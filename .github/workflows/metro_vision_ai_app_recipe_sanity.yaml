@@ -58,6 +58,7 @@ jobs:
        sudo apt-get update
        sudo pip install robotframework
        sudo apt install -y python3-nose 
+       python -m pip install --upgrade pip
        pip3 install selenium
        cd edge-ai-suites-repo/metro-ai-suite/metro-vision-ai-app-recipe/test-suite/robot_files
        robot test.robot || true  
