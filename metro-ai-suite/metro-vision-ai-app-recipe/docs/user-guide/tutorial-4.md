@@ -1,19 +1,20 @@
-# AI Tolling System Tutorial
+# Crowd Analytics System Tutorial
 
 <!--
-**Sample Description**: This tutorial demonstrates how to build an intelligent tolling system using edge AI technologies for real-time vehicle detection, license plate recognition, and vehicle attribute analysis.
--->
+**Sample Description**: This tutorial demonstrates how to build an intelligent crowd analytics system using edge AI technologies for real-time vehicle detection, license plate recognition, and vehicle attribute analysis.
+
 
 This tutorial walks you through creating an AI-powered tolling system that automatically detects vehicles, recognizes license plates, and analyzes vehicle attributes in real-time. The system leverages Intel's DLStreamer framework with pre-trained AI models to process video streams from toll booth cameras, enabling automated toll collection and traffic monitoring.
+-->
 
 <!--
-**What You Can Do**: This guide covers the complete development workflow for building an AI tolling application.
+**What You Can Do**: This guide covers the complete development workflow for building a Crowd Analytics system.
 -->
 
 By following this guide, you will learn how to:
-- **Set up the AI Tolling Application**: Create a new application based on the Smart Parking template and configure it for tolling use cases
-- **Download and Configure AI Models**: Install YOLO object detection models and Intel's specialized license plate recognition models
-- **Configure Video Processing Pipeline**: Set up the DLStreamer pipeline for real-time vehicle detection and license plate recognition
+- **Set up the Crowd Analytics Application**: Create a new application based on the Smart Parking template and configure it for crowd analytics use cases
+- **Download and Configure AI Models**: Install YOLO object detection models
+- **Configure Video Processing Pipeline**: Set up the DLStreamer pipeline (for real-time vehicle detection and license plate recognition)
 - **Deploy and Run the System**: Launch the containerized application and monitor its performance
 
 ## Prerequisites
@@ -29,19 +30,20 @@ By following this guide, you will learn how to:
 <!--
 **Architecture Image Placeholder**: Add architecture diagram showing the flow from video input through AI models to toll processing output
 -->
-![AI Tolling Sytem Diagram](_images/ai-tolling-system.svg)
+![Crowd Analytics System Diagram](_images/ai-tolling-system.svg)
 
 
-The AI Tolling system consists of several key components:
+The Crowd Analytics system consists of several key components:
+<!--
 - **Video Input**: Processes live camera feeds or video files from toll booth cameras
 - **Object Detection**: Uses YOLOv10s model to detect vehicles in the video stream
 - **License Plate Recognition**: Employs Intel's specialized model to extract license plate text
 - **Vehicle Attributes**: Analyzes vehicle type, color, and other characteristics
 - **Data Processing**: Aggregates results for toll calculation and traffic monitoring
-
+-->
 ## Set up and First Use
 
-### 1. **Create the AI Tolling Application Directory**
+### 1. **Create the Crowd Analytics Application Directory**
 
 Navigate to the metro vision AI recipe directory and create the AI tolling application by copying the Smart Parking template:
 
@@ -55,10 +57,10 @@ This creates a new `ai-tolling` directory with all the necessary application str
 ### 2. **Download Sample Video File**
 
 Download a sample video file containing vehicle traffic for testing the AI tolling system:
-
+<!--
 ```bash
-mkdir -p ./ai-tolling/src/dlstreamer-pipeline-server/videos/
-wget -O ./ai-tolling/src/dlstreamer-pipeline-server/videos/cars_extended.mp4 \
+mkdir -p ./crowd-analytics/src/dlstreamer-pipeline-server/videos/
+wget -O ./crowd-analytics/src/dlstreamer-pipeline-server/videos/cars_extended.mp4 \
   https://github.com/open-edge-platform/edge-ai-resources/raw/refs/heads/main/videos/cars_extended.mp4
 ```
 
@@ -75,7 +77,7 @@ The sample video contains:
 - Resolution: 640x360
 
 </details>
-
+-->
 ### 3. **Download and Setup AI Models**
 
 Create and run the model download script to install all required AI models:
@@ -88,25 +90,16 @@ docker run --rm --user=root \
 
 cd /home/dlstreamer/metro-suite/
 
-mkdir -p ai-tolling/src/dlstreamer-pipeline-server/models/public
-export MODELS_PATH=/home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models
+mkdir -p crowd-analytics/src/dlstreamer-pipeline-server/models/public
+export MODELS_PATH=/home/dlstreamer/metro-suite/crowd-analytics/src/dlstreamer-pipeline-server/models
 /home/dlstreamer/dlstreamer/samples/download_public_models.sh yolov10s
 
-mkdir -p ai-tolling/src/dlstreamer-pipeline-server/models/intel
+mkdir -p crowd-analytics/src/dlstreamer-pipeline-server/models/intel
 
 python3 -m pip install openvino-dev[onnx,tensorflow2]
 
-omz_downloader --name license-plate-recognition-barrier-0007 -o /home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/
-omz_converter --name license-plate-recognition-barrier-0007  -o /home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/ -d /home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/
-wget -O "/home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/public/license-plate-recognition-barrier-0007/license-plate-recognition-barrier-0007.json" "https://raw.githubusercontent.com/dlstreamer/dlstreamer/refs/heads/master/samples/gstreamer/model_proc/intel/license-plate-recognition-barrier-0007.json"
-
-
-omz_downloader --name vehicle-attributes-recognition-barrier-0039 -o /home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/
-omz_converter --name  vehicle-attributes-recognition-barrier-0039 -o /home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/ -d /home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/
-wget -O "/home/dlstreamer/metro-suite/ai-tolling/src/dlstreamer-pipeline-server/models/intel/vehicle-attributes-recognition-barrier-0039/vehicle-attributes-recognition-barrier-0039.json" "https://raw.githubusercontent.com/dlstreamer/dlstreamer/refs/heads/master/samples/gstreamer/model_proc/intel/vehicle-attributes-recognition-barrier-0039.json"
-
 echo "Fix ownership..."
-chown -R "$(id -u):$(id -g)" ai-tolling/src/dlstreamer-pipeline-server/models ai-tolling/src/dlstreamer-pipeline-server/videos 2>/dev/null || true
+chown -R "$(id -u):$(id -g)" crowd-analytics/src/dlstreamer-pipeline-server/models crowd-analytics/src/dlstreamer-pipeline-server/videos 2>/dev/null || true
 EOF
 )"
 
@@ -117,8 +110,6 @@ The installation script downloads three essential AI models:
 | **Model Name** | **Purpose** | **Framework** | **Size** |
 |----------------|-------------|---------------|----------|
 | YOLOv10s | Vehicle detection and tracking | PyTorch/OpenVINO | ~20MB |
-| license-plate-recognition-barrier-0007 | License plate text extraction | Intel OpenVINO | ~2MB |
-| vehicle-attributes-recognition-barrier-0039 | Vehicle type and color analysis | Intel OpenVINO | ~1MB |
 
 <details>
 <summary>
@@ -129,7 +120,9 @@ The installation script performs the following operations:
 1. Creates the required directory structure under `src/dlstreamer-pipeline-server/models/`
 2. Runs a DLStreamer container to access model download tools
 3. Downloads public YOLO models using the built-in download scripts
+<!--
 4. Uses OpenVINO Model Zoo downloader for Intel-optimized models
+-->
 5. Downloads corresponding model configuration files for proper inference
 6. Sets up proper file permissions for container access
 
@@ -139,10 +132,10 @@ Expected download time: 5-10 minutes depending on internet connection.
 
 ### 4. **Configure the AI Processing Pipeline**
 
-Update the pipeline configuration to use the tolling-specific AI models. Create or update the configuration file:
+Update the pipeline configuration to use the _________ AI models. Create or update the configuration file:
 
 ```bash
-cat > ./ai-tolling/src/dlstreamer-pipeline-server/config.json << 'EOF'
+cat > ./crowd-analytics/src/dlstreamer-pipeline-server/config.json << 'EOF'
 {
     "config": {
         "logging": {
@@ -154,11 +147,10 @@ cat > ./ai-tolling/src/dlstreamer-pipeline-server/config.json << 'EOF'
         ],
         "pipelines": [
             {
-                "name": "car_plate_recognition_1",
+                "name": "yolov10_1_cpu",
                 "source": "gstreamer",
                 "queue_maxsize": 50,
-                "pipeline": "{auto_source} name=source ! decodebin ! gvadetect model=/home/pipeline-server/models/public/yolov10s/FP32/yolov10s.xml device=CPU pre-process-backend=ie ! queue ! gvaclassify model=/home/pipeline-server/models/public/license-plate-recognition-barrier-0007/FP16/license-plate-recognition-barrier-0007.xml model_proc=/home/pipeline-server/models/public/license-plate-recognition-barrier-0007/license-plate-recognition-barrier-0007.json device=CPU pre-process-backend=ie ! queue ! gvaclassify model=/home/pipeline-server/models/intel/vehicle-attributes-recognition-barrier-0039/FP16-INT8/vehicle-attributes-recognition-barrier-0039.xml model_proc=/home/pipeline-server/models/intel/vehicle-attributes-recognition-barrier-0039/vehicle-attributes-recognition-barrier-0039.json device=CPU pre-process-backend=ie ! queue ! gvawatermark ! gvametaconvert add-empty-results=true name=metaconvert ! gvafpscounter ! appsink name=destination",
-                "description": "Car plate recognition with license-plate-recognition-barrier-0007",
+                "pipeline": "{auto_source} name=source ! decodebin ! gvadetect model=/home/pipeline-server/models/public/yolov10s/FP32/yolov10s.xml pre-process-backend=opencv threshold=0.7 model-instance-id=inst0 name=detection ! queue ! gvaclassify model=/home/pipeline-server/models/colorcls2/colorcls2.xml model_proc=/home/pipeline-server/models/colorcls2/colorcls2.json pre-process-backend=opencv model-instance-id=inst1 name=classification ! queue ! gvapython module=/home/pipeline-server/models/colorcls2/process class=Process function=process_frame ! queue ! gvawatermark ! gvametaconvert add-empty-results=true name=metaconvert ! gvafpscounter ! appsink name=destination",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -186,7 +178,7 @@ cat > ./ai-tolling/src/dlstreamer-pipeline-server/config.json << 'EOF'
 }
 EOF
 ```
-
+<!--
 <details>
 <summary>
 Pipeline Configuration Explanation
@@ -207,20 +199,20 @@ The GStreamer pipeline configuration defines the AI processing workflow:
 Each element can be configured for different hardware targets (CPU, GPU, VPU).
 
 </details>
-
+-->
 ### 5. **Configure Application Environment**
 
-Update the environment configuration to use the AI tolling application:
+Update the environment configuration to use the Crowd Analytics application:
 
 ```bash
 # Update the .env file to specify the ai-tolling application and HOST IP Address
-sed -i 's/^SAMPLE_APP=.*/SAMPLE_APP=ai-tolling/' .env
+sed -i 's/^SAMPLE_APP=.*/SAMPLE_APP=crowd-analytics/' .env
 sed -i "s/^HOST_IP=.*/HOST_IP=$(hostname -I | cut -f1 -d' ')/" .env
 
 
 # Create self signed certificate for nginx
-mkdir -p ai-tolling/src/nginx/ssl
-cd ai-tolling/src/nginx/ssl
+mkdir -p src/nginx/ssl
+cd crowd-analytics/src/nginx/ssl
 if [ ! -f server.key ] || [ ! -f server.crt ]; then
     echo "Generate self-signed certificate..."
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt -subj "/C=US/ST=CA/L=San Francisco/O=Intel/OU=Edge AI/CN=localhost"
@@ -233,7 +225,7 @@ grep SAMPLE_APP= .env
 grep HOST_IP= .env
 ```
 
-Expected output: `SAMPLE_APP=ai-tolling`
+Expected output: `SAMPLE_APP=crowd-analytics`
 
 ### 6. **Deploy the Application**
 
@@ -283,11 +275,11 @@ Open your web browser and navigate to:
 Start the AI pipeline and process the sample video:
 
 ```bash
-# Start the AI tolling pipeline with the sample video
-curl -k -s https://localhost/api/pipelines/user_defined_pipelines/car_plate_recognition_1 -X POST -H 'Content-Type: application/json' -d '
+# Start the crowd analytics pipeline with the sample video
+curl -k -s https://localhost/api/pipelines/user_defined_pipelines/yolov10_1_cpu -X POST -H 'Content-Type: application/json' -d '
 {
     "source": {
-        "uri": "file:///home/pipeline-server/videos/cars_extended.mp4",
+        "uri": "file:///home/pipeline-server/videos/new_video_1.mp4",
         "type": "uri"
     },
     "destination": {
@@ -317,17 +309,17 @@ Access the processed video stream with AI annotations through WebRTC:
 http://<HOST_IP>:8889/object_detection_1
 ```
 
-For local testing, you can use: `http://localhost/mediamtx//object_detection_1/`
+For local testing, you can use: `http://localhost:8889/object_detection_1`
 
 ![Vehicle Live Detection](_images/car_live_detection.jpg)
-
+<!--
 Expected results:
 - Vehicle detection accuracy > 90%
 - License plate recognition for clearly visible plates
 - Vehicle attribute classification (car, truck, color)
 - Real-time processing at 15-30 FPS
 - Live video stream with bounding boxes and annotations
-
+-->
 ## Troubleshooting
 
 ### 1. **Container Startup Issues**
@@ -365,7 +357,7 @@ If video processing fails or shows poor accuracy:
 docker logs dlstreamer-pipeline-server
 
 # Verify model files are properly installed
-ls -la ./ai-tolling/src/dlstreamer-pipeline-server/models/
+ls -la ./crowd-analytics/src/dlstreamer-pipeline-server/models/
 
 # Test with different video source
 # Replace the video file with a different sample
