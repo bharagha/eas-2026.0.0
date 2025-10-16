@@ -60,7 +60,6 @@ jobs:
        sudo apt install -y python3-nose libxml2-utils vlc
        cd edge-ai-suites-repo/manufacturing-ai-suite/industrial-edge-insights-vision/tests/robot_files
        robot test.robot 
-       
        mkdir -p /tmp/test_results
        cp -r report.html log.html output.xml  /tmp/test_results/
        passed=$(xmllint --xpath "//return/status[@status='PASS']" ./output.xml | wc -l) || true
@@ -75,6 +74,7 @@ jobs:
        echo "- 📄 [Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
     - name: Upload Scan artifact to Github
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: Sanity_Reports
         path: /tmp/test_results/*

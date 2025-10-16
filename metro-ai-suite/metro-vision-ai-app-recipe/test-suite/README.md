@@ -1,4 +1,4 @@
-# Automation Framework for Industrial Edge Insights Vision
+# Automation Framework for Metro Vision AI App
 
 This directory contains test scripts and utility functions required for automation testing.
 
