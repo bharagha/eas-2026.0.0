@@ -16,19 +16,6 @@
                     "type": "webrtc",
                     "peer-id": "object_tracking_$x"
                 }
-            },
-            "parameters": {
-                "detection-properties": {
-                    "model": "/home/pipeline-server/models/intel/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml",
-                    "device": "NPU",
-                    "inference-interval": 3,
-                    "inference-region": 0,
-                    "batch-size": 1,
-                    "nireq": 4,
-                    "pre-process-backend": "opencv",
-                    "threshold": 0.7,
-                    "model-instance-id": "instnpu0"
-                }
             }
         }
     }

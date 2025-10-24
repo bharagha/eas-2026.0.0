@@ -51,6 +51,78 @@ function get_pipeline_status() {
     curl -k -s "https://$DLSPS_NODE_IP/api/pipelines/status" "$@"
 }
 
+function check_and_loop_video() {
+  local payload=$1
+  local source_uri=$(echo "$payload" | jq -r '.source.uri // empty')
+  
+  if [ -z "$source_uri" ]; then
+    return 0
+  fi
+  
+  # Extract just the filename from the URI (handle file:// prefix and paths)
+  local filename=$(basename "$source_uri")
+  
+  # Check if filename ends with _looped.mp4
+  if [[ "$filename" =~ _looped\.mp4$ ]]; then
+    # Extract base filename (remove _looped.mp4 suffix)
+    local base_filename="${filename%_looped.mp4}.mp4"
+    
+    # Search for the base file in common video locations
+    local base_file=""
+    local search_paths=(
+      "./loitering-detection/src/dlstreamer-pipeline-server/videos"
+      "./smart-parking/src/dlstreamer-pipeline-server/videos"
+    )
+    
+    for search_path in "${search_paths[@]}"; do
+      if [ -f "$search_path/$base_filename" ]; then
+        base_file="$search_path/$base_filename"
+        break
+      fi
+    done
+    
+    if [ -z "$base_file" ]; then
+      echo "Error: Base video file not found: $base_filename (searched in common locations)" >&2
+      return 1
+    fi
+    
+    # Determine output path (same directory as base file)
+    local output_file="$(dirname "$base_file")/$filename"
+    
+    # Skip if looped file already exists
+    if [ -f "$output_file" ]; then
+      echo "Looped video already exists: $output_file" >&2
+      return 0
+    fi
+    
+    # Check if ffmpeg is available
+    if ! command -v ffmpeg &> /dev/null; then
+      echo "Error: ffmpeg is required to create looped video but is not installed." >&2
+      return 1
+    fi
+    
+    echo "Creating looped video: $output_file from $base_file" >&2
+    
+    # Create looped video with moov atom at the beginning for streaming
+    # -stream_loop 10: loop the video 10 times
+    # -c copy: copy codec without re-encoding
+    # -movflags +faststart: move moov atom to the beginning for streaming
+    ffmpeg -stream_loop 10 -i "$base_file" \
+      -c copy \
+      -movflags +faststart \
+      "$output_file" -y 2>&1 | grep -v "frame=" >&2
+    
+    if [ $? -ne 0 ]; then
+      echo "Error: Failed to create looped video." >&2
+      return 1
+    fi
+    
+    echo "Successfully created looped video: $output_file" >&2
+  fi
+  
+  return 0
+}
+
 function run_pipelines() {
   local num_pipelines=$1
   local payload_data=$2
@@ -174,6 +246,13 @@ function run_and_analyze_workload() {
     pipeline_name=$(jq -r '.[0].pipeline' "$payload_file")
     local payload_body
     payload_body=$(jq '.[0].payload' "$payload_file")
+
+    # Check and create looped video if needed (only once per payload)
+    check_and_loop_video "$payload_body"
+    if [ $? -ne 0 ]; then
+      echo "Error: Video preparation failed." >&2
+      return 1
+    fi
 
     run_pipelines "$num_streams" "$payload_body" "$pipeline_name"
     if [ $? -ne 0 ]; then
