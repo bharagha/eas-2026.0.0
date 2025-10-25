@@ -112,19 +112,12 @@ Open a browser and go to the following endpoints to access the application. Use 
     - **Password**: `admin` (You will be prompted to change it on first login.)
 
 ### **InfluxDB UI** ###
-- **URL**: [https://localhost/influxdb/](https://localhost/influxdb/) *(Recommended for API access)*
-- **Alternative URL**: Direct access at `http://<host_ip>:8086` *(Recommended for full UI functionality)*
+- **URL**: [https://localhost/influxdb/](https://localhost/influxdb/) *(Recommended for API access only since InfluxDB has limited support for sub-path proxying)*
+- **Alternative URL**: Direct access at `http://localhost:8086` *(Recommended for full UI functionality)*
 - **Log in with credentials**:
     - **Username**: `<your_influx_username>` (Check `./smart-intersection/src/secrets/influxdb2/influxdb2-admin-username`)
     - **Password**: `<your_influx_password>` (Check `./smart-intersection/src/secrets/influxdb2/influxdb2-admin-password`).
 
-> **Note**: InfluxDB has limited support for sub-path proxying. For the best experience with the full UI, temporarily expose the port in docker-compose.yml:
-> ```yaml
-> influxdb2:
->   ports:
->     - "8086:8086"
-> ```
-> Then access directly at `http://localhost:8086`. The reverse proxy path `/influxdb/` works well for API access.
 
 ### **NodeRED UI** ###
 - **URL**: [https://localhost/nodered/](https://localhost/nodered/)
@@ -135,12 +128,6 @@ Open a browser and go to the following endpoints to access the application. Use 
     ```bash
     curl -k https://localhost/api/pipelines/status
     ```
-
-> **Note**: The nginx reverse proxy routes API calls as follows:
-> - `/api/v1/*` → SceneScape web service (database status, scene management, etc.)
-> - `/api/pipelines/*` → DL Streamer Pipeline Server (pipeline management)
-> - `/influxdb/api/v2/*` → InfluxDB service (database API through sub-path)
-> - `/api/*` (other paths) → DL Streamer Pipeline Server
 
 ## Verify the Application
 
@@ -154,44 +141,6 @@ Open a browser and go to the following endpoints to access the application. Use 
     ```bash
     docker compose down
     ```
-
-## Troubleshooting
-
-### **SceneScape "Database Loading" Issue**
-If SceneScape shows "database loading" for an extended time:
-1. **Check container status**: `docker compose ps` - ensure all services are "healthy"
-2. **Check database initialization**: `docker compose logs pgserver` - look for "Database status updated to ready"
-3. **Wait for initialization**: The database can take 1-2 minutes to fully initialize on first run
-4. **Check web service**: `docker compose logs web` - should show successful health checks
-
-### **InfluxDB UI Loading Issues**
-If InfluxDB UI fails to load properly through `/influxdb/`:
-
-**Common Errors:**
-- **404 errors for `.js` files** (e.g., `21dc121c3b.js`, `46567a999a.js`)
-- **404 errors for `.wasm` files** (e.g., `639fb0adfd.wasm`)
-- **Service Worker registration failures** (SSL certificate errors)
-- **WebAssembly compilation errors** ("HTTP status code is not ok")
-- **Scripts not loading** or **blank page**
-- **MIME type errors** for JavaScript files
-
-**Solutions:**
-1. **Try refreshing** the page after nginx configuration reload
-2. **Check console errors** - some static assets may need time to load
-3. **Use direct port access** (recommended for full functionality):
-   ```yaml
-   # In docker-compose.yml, add to influxdb2 service:
-   influxdb2:
-     ports:
-       - "8086:8086"
-   ```
-   Then access at `http://localhost:8086`
-4. **Clear browser cache** - InfluxDB's asset hashes may be cached incorrectly
-
-### **General Nginx Issues**
-- **Reload configuration**: `docker compose exec nginx nginx -s reload`
-- **Check nginx logs**: `docker compose logs nginx`
-- **Restart nginx**: `docker compose restart nginx`
 
 ## Other Deployment Option
 
