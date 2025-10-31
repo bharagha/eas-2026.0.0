@@ -76,7 +76,6 @@ jobs:
         shell: bash
         run: |
           pwd
-          cd manufacturing-ai-suite/industrial-edge-insights-time-series/
           CWD=$(pwd)
           trivy --version
           which trivy
@@ -164,7 +163,6 @@ jobs:
         shell: bash
         run: |
           pwd
-          cd manufacturing-ai-suite/industrial-edge-insights-time-series/
           CWD=$(pwd)
           trivy --version
           which trivy
@@ -210,7 +208,7 @@ jobs:
               CWD=$(pwd)
               if [[ "${{ inputs.application }}" == "time-series" || "${{ inputs.application }}" == "both" ]]; then
                 echo "Building Time Series Sample app and scanning docker images"
-                cd manufacturing-ai-suite/industrial-edge-insights-time-series/
+                cd $CWD/manufacturing-ai-suite/industrial-edge-insights-time-series/
                 make down
 
                 OPC_UA_SERVER_IMAGE=$(grep '^OPC_UA_SERVER_IMAGE=' .env | cut -d'=' -f2)
@@ -247,7 +245,7 @@ jobs:
 
               if [[ "${{ inputs.application }}" == "multimodal" || "${{ inputs.application }}" == "both" ]]; then
                 echo "Building Multimodal Weld Defect Detection Sample app and scanning docker images"
-                cd manufacturing-ai-suite/industrial-edge-insights-multimodal/
+                cd $CWD/manufacturing-ai-suite/industrial-edge-insights-multimodal/
                 make down
 
                 WELD_SIMULATOR_IMAGE=$(grep '^WELD_SIMULATOR_IMAGE=' .env | cut -d'=' -f2)
@@ -317,7 +315,6 @@ jobs:
         shell: bash
         run: |
           pwd
-          cd manufacturing-ai-suite/industrial-edge-insights-time-series/
           trivy --version
           which trivy
           trivy image --download-db-only
