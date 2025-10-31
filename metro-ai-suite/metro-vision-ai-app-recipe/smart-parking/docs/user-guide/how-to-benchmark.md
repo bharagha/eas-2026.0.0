@@ -56,16 +56,69 @@ During each test run, the script logs the `avg_fps` for every active pipeline in
 
 The `benchmark_start.sh` script requires a pipeline name and stream count boundaries to run. The available pipelines are defined in the `benchmark_app_payload.json` file located within each application's directory (e.g., `smart-parking/`).
 
+<details>
+<summary>Example Payload with Detection and Classification</summary>
+
+The `benchmark_app_payload.json` file contains an array of pipeline configurations. Each configuration specifies the pipeline name and a payload with parameters for source, destination, and AI models. The script uses the pipeline name to select the corresponding payload for benchmarking.
+
+Here is an example of a GPU pipeline configuration that includes both `detection-properties` and `classification-properties` with additional parameters:
+
+```json
+{
+    "pipeline": "yolov11s_1_gpu",
+    "payload": {
+        "source": {
+            "uri": "file:///home/pipeline-server/videos/new_video_1_looped.mp4",
+            "type": "uri"
+        },
+        "destination": {
+            "metadata": {
+                "type": "mqtt",
+                "topic": "object_detection_$x",
+                "publish_frame": false
+            },
+            "frame": {
+                "type": "webrtc",
+                "peer-id": "object_detection_$x"
+            }
+        },
+        "parameters": {
+            "detection-properties": {
+                "model": "/home/pipeline-server/models/public/yolo11s/INT8/yolo11s.xml",
+                "device": "GPU",
+                "inference-interval": 3,
+                "inference-region": 0,
+                "batch-size": 8,
+                "nireq": 2,
+                "ie-config": "NUM_STREAMS=2",
+                "pre-process-backend": "va-surface-sharing",
+                "threshold": 0.7
+            },
+            "classification-properties": {
+                "model": "/home/pipeline-server/models/colorcls2/colorcls2.xml",
+                "device": "GPU",
+                "inference-interval": 3,
+                "batch-size": 8,
+                "nireq": 2,
+                "ie-config": "NUM_STREAMS=2",
+                "pre-process-backend": "va-surface-sharing"
+            }
+        }
+    }
+}
+```
+</details>
+
 ### Example: Running Stream Density Benchmark for Smart Parking
 
 This example will find the maximum number of smart parking streams that can run on the CPU while maintaining at least 15 FPS.
 
-1.  Execute the `benchmark_start.sh` script, providing the desired pipeline name (`object_tracking_cpu` in this case). Here, we test a range of 1 to 16 streams.
+1.  Execute the `benchmark_start.sh` script, providing the desired pipeline name (`yolov11s_1_gpu` in this case). Here, we test a range of 1 to 16 streams.
 
     ```bash
     # Usage: ./benchmark_start.sh -p <pipeline_name> -l <lower_bound> -u <upper_bound> -t <target_fps>
     
-    ./benchmark_start.sh -p object_tracking_cpu -l 1 -u 16 -t 15
+    ./benchmark_start.sh -p yolov11s_1_gpu -l 1 -u 16 -t 15
     ```
 
 2.  The script will output its progress as it tests different stream counts. The final output will show the optimal stream density found.

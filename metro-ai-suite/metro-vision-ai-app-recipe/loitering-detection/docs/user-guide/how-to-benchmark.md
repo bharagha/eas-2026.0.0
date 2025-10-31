@@ -56,6 +56,50 @@ During each test run, the script logs the `avg_fps` for every active pipeline in
 
 The `benchmark_start.sh` script requires a pipeline name and stream count boundaries to run. The available pipelines are defined in the `benchmark_app_payload.json` file located within each application's directory (e.g., `loitering-detection/`).
 
+<details>
+<summary>Example Payload with Detection and Classification</summary>
+
+The `benchmark_app_payload.json` file contains an array of pipeline configurations. Each configuration specifies the pipeline name and a payload with parameters for source, destination, and AI models. The script uses the pipeline name to select the corresponding payload for benchmarking.
+
+Here is an example of a GPU pipeline configuration that includes both `detection-properties` and `classification-properties` with additional parameters:
+
+```json
+{
+    "pipeline": "object_tracking_gpu",
+    "payload": {
+        "source": {
+            "uri": "file:///home/pipeline-server/videos/VIRAT_S_000101_looped.mp4",
+            "type": "uri"
+        },
+        "destination": {
+            "metadata": {
+                "type": "mqtt",
+                "topic": "object_detection_$x",
+                "publish_frame": false
+            },
+            "frame": {
+                "type": "webrtc",
+                "peer-id": "object_detection_$x"
+            }
+        },
+        "parameters": {
+            "detection-properties": {
+                "model": "/home/pipeline-server/models/intel/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml",
+                "device": "GPU",
+                "inference-interval": 3,
+                "inference-region": 0,
+                "batch-size": 8,
+                "nireq": 2,
+                "ie-config": "NUM_STREAMS=2",
+                "pre-process-backend": "va-surface-sharing",
+                "threshold": 0.7
+            }
+        }
+    }
+}
+```
+</details>
+
 ### Example: Running Stream Density Benchmark for Loitering Detection
 
 This example will find the maximum number of loitering detection streams that can run on the CPU while maintaining at least 15 FPS.
