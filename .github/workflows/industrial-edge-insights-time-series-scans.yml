@@ -405,10 +405,10 @@ jobs:
         include:
           - dockerfile-path: manufacturing-ai-suite/industrial-edge-insights-multimodal/weld-data-simulator/Dockerfile
             output-report-path: trivy-weld-simulator-dockerfile.json
-            scan-name: Time Series Weld Data Simulator Dockerfile
+            scan-name: Multimodal Weld Data Simulator Dockerfile
           - dockerfile-path: manufacturing-ai-suite/industrial-edge-insights-multimodal/fusion-analytics/Dockerfile
             output-report-path: trivy-fusion-analytics-dockerfile.json
-            scan-name: Time Series Fusion Analytics Dockerfile
+            scan-name: Multimodal Fusion Analytics Dockerfile
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
     with:
       dockerfile-path: ${{ matrix.dockerfile-path }}
@@ -673,6 +673,7 @@ jobs:
           VISUALIZER_GRAFANA_PASSWORD=$(openssl rand -hex 10)
           MTX_WEBRTCICESERVERS2_0_USERNAME=$(cat /dev/urandom | tr -dc 'a-zA-Z' | head -c 8)
           MTX_WEBRTCICESERVERS2_0_PASSWORD=$(openssl rand -hex 10)
+          HOST_IP=$(hostname -I | awk '{print $1}')
 
           sed -i "s/INFLUXDB_USERNAME=.*/INFLUXDB_USERNAME=${INFLUXDB_USERNAME}/g" .env
           sed -i "s/INFLUXDB_PASSWORD=.*/INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}/g" .env
@@ -680,7 +681,8 @@ jobs:
           sed -i "s/VISUALIZER_GRAFANA_PASSWORD=.*/VISUALIZER_GRAFANA_PASSWORD=${VISUALIZER_GRAFANA_PASSWORD}/g" .env
           sed -i "s/MTX_WEBRTCICESERVERS2_0_USERNAME=.*/MTX_WEBRTCICESERVERS2_0_USERNAME=${MTX_WEBRTCICESERVERS2_0_USERNAME}/g" .env
           sed -i "s/MTX_WEBRTCICESERVERS2_0_PASSWORD=.*/MTX_WEBRTCICESERVERS2_0_PASSWORD=${MTX_WEBRTCICESERVERS2_0_PASSWORD}/g" .env
- 
+          sed -i "s/HOST_IP=.*/HOST_IP=${HOST_IP}/g" .env
+
           make build
           echo "Deploying using mqtt ingestion"
           make up
