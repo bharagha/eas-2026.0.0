@@ -91,11 +91,11 @@ throughput cumulative: 173.8
 
 **Common Issues:**
 
-1. **DLSPS Not Accessible**
+1. **DL Streamer Pipeline Server Not Accessible**
    ```
    Error: DL Streamer Pipeline Server is not running or not reachable
    ```
-   - Verify DLSPS is running: `docker ps | grep dlstreamer`
+   - Verify DL Streamer Pipeline Server is running: `docker ps | grep dlstreamer`
    - Check network connectivity to localhost
 
 2. **Pipeline Startup Failures**
