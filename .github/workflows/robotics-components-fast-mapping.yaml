@@ -4,12 +4,15 @@
 
 on:
   workflow_call:
+    # workaround until unified workflow is implemented
+    inputs:
+      component-name:
+        default: fast-mapping
+        required: false
+        type: string
 
 permissions:
   contents: read
-
-env:
-  COMPONENT_NAME: fast-mapping
 
 defaults:
   run:
@@ -17,7 +20,7 @@ defaults:
 
 jobs:
   # lint:
-  #   name: '[${{ env.COMPONENT_NAME }}] Lint'
+  #   name: '[${{ inputs.component-name }}] Lint'
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout code
@@ -33,7 +36,7 @@ jobs:
   #         make lint
 
   license-check:
-    name: '[${{ env.COMPONENT_NAME }}] License Check'
+    name: '[${{ inputs.component-name }}] License Check'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,7 +52,7 @@ jobs:
   build-test:
     # needs: [lint, license-check]
     needs: [license-check]
-    name: '[${{ env.COMPONENT_NAME }}] Build & Test (${{ matrix.ros_distro }})'
+    name: '[${{ inputs.component-name }}] Build & Test (${{ matrix.ros_distro }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -82,7 +85,7 @@ jobs:
 
   build-package:
     needs: [build-test]
-    name: '[${{ env.COMPONENT_NAME }}] Build Package (${{ matrix.ros_distro }})'
+    name: '[${{ inputs.component-name }}] Build Package (${{ matrix.ros_distro }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -116,7 +119,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ matrix.ros_distro }}
       cancel-in-progress: true
-    name: '[${{ env.COMPONENT_NAME }}] E2E tests (${{ matrix.ros_distro }})'
+    name: '[${{ inputs.component-name }}] E2E tests (${{ matrix.ros_distro }})'
     runs-on: ubuntu-latest
     needs: build-package
     strategy:

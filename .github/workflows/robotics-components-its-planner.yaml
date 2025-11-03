@@ -4,16 +4,19 @@
 
 on:
   workflow_call:
+    inputs:
+      # workaround until unified workflow is implemented
+      component-name:
+        default: its-planner
+        required: false
+        type: string
 
 permissions:
   contents: read
 
-env:
-  COMPONENT_NAME: its-planner
-
 jobs:
   dummy:
-    name: '[${{ env.COMPONENT_NAME }}] Dummy job'
+    name: '[${{ inputs.component-name }}] Dummy job'
     runs-on: ubuntu-latest
     steps:
       - shell: bash
