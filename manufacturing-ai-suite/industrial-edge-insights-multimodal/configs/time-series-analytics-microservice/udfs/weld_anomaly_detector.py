@@ -150,8 +150,10 @@ class AnomalyDetectorHandler(Handler):
         point.fieldsDouble["Defective Weld"] = round(bad_defect, 2) if "bad_defect" in locals() else 0.0
         
         time_now = time.time_ns()
-        point.fieldsDouble["processing_time"] = time_now - start_time
-        point.fieldsDouble["end_end_time"] = time_now - point.time
+        processing_time = time_now - start_time
+        end_end_time = time_now - point.time
+        point.fieldsDouble["processing_time"] = processing_time
+        point.fieldsDouble["end_end_time"] = end_end_time
 
         logger.info("Processing point %s %s for source %s", point.time, time.time(), server)
 

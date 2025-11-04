@@ -202,8 +202,10 @@ class AnomalyDetectorHandler(Handler):
             point.fieldsDouble["anomaly_status"] = 0.0
 
         time_now = time.time_ns()
-        point.fieldsDouble["processing_time"] = time_now - start_time
-        point.fieldsDouble["end_end_time"] = time_now - point.time
+        processing_time = time_now - start_time
+        end_end_time = time_now - point.time
+        point.fieldsDouble["processing_time"] = processing_time
+        point.fieldsDouble["end_end_time"] = end_end_time
         response.point.CopyFrom(point)
 
         self._agent.write_response(response, True)
