@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 name: "[Industrial Edge Insights Time Series and Multimodal] PR workflow"
-run-name: "[Industrial Edge Insights Time Series and Multimodal] PR  workflow (by @${{ github.actor }} via ${{ github.event_name }})"
+run-name: "[Industrial Edge Insights Time Series and Multimodal] PR workflow (by @${{ github.actor }} via ${{ github.event_name }})"
 on:
   pull_request:
     paths:
@@ -126,7 +126,6 @@ jobs:
         cd "${{ github.workspace }}"
         cd ./timeseries/manufacturing-ai-suite/industrial-edge-insights-multimodal
         echo "Deploying Multimodal Weld Defect Detection Sample App"
-        echo "Deploying using mqtt ingestion"
         make up
     - name: Undeploying Multimodal Weld Defect Detection Sample App
       run: |
