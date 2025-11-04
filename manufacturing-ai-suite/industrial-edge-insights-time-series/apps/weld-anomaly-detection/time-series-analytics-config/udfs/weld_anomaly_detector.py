@@ -152,16 +152,12 @@ class AnomalyDetectorHandler(Handler):
         time_now = time.time_ns()
         point.fieldsDouble["processing_time"] = time_now - start_time
         point.fieldsDouble["end_end_time"] = time_now - point.time
-        
-        logger.debug(f"Added processing_time: {time_now - start_time}")
-        logger.debug(f"Added end_end_time: {time_now - point.time}")
 
         logger.info("Processing point %s %s for source %s", point.time, time.time(), server)
 
         response = udf_pb2.Response()
         if "anomaly_status" not in point.fieldsDouble:
             point.fieldsDouble["anomaly_status"] = 0.0
-            logger.debug("Added default anomaly_status field")
         response.point.CopyFrom(point)
         self._agent.write_response(response, True)
 
