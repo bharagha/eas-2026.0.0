@@ -75,10 +75,16 @@ jobs:
         run: |
           ROS_DISTRO=${{ matrix.ros_distro }} make test
 
+      - name: Debug info (artifacts)
+        shell: bash
+        run: |
+          find . -type d -name Testing
+          find . -type d -name test_results
+
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
-          name: 'test-results-${{ matrix.ros_distro }}'
+          name: 'fast-mapping-test-results-${{ matrix.ros_distro }}'
           path: |
             build/*/Testing
             build/*/test_results
@@ -103,6 +109,11 @@ jobs:
         run: |
           ROS_DISTRO=${{ matrix.ros_distro }} make package
 
+      - name: Debug info (artifacts)
+        shell: bash
+        run: |
+          find . -type f -name "*.deb"
+
       - name: Collect build artifacts
         shell: bash
         run: |
@@ -112,7 +123,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
         with:
-          name: ros-${{ matrix.ros_distro }}-packages
+          name: ros-${{ matrix.ros_distro }}-fast-mapping-packages
           path: output/*.deb
 
   test-e2e:
@@ -135,7 +146,7 @@ jobs:
       - name: Download debian packages
         uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53  # v6.0.0
         with:
-          name: ros-${{ matrix.ros_distro }}-packages
+          name: ros-${{ matrix.ros_distro }}-fast-mapping-packages
           path: ./
 
       - name: Run E2E tests
