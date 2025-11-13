@@ -1,3 +1,9 @@
+<!--
+Copyright (C) 2025 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # RVC (Robot Vision & Control)
 
 Exemplary code and configuration for two uses cases:
