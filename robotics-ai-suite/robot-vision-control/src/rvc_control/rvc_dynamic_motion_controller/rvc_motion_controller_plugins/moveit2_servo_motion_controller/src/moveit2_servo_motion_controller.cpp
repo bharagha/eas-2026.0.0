@@ -75,7 +75,6 @@ Moveit2ServoMotionController::Moveit2ServoMotionController ( )
 bool Moveit2ServoMotionController::init ( rclcpp::Node::SharedPtr node )
 {
     auto res = RVCMotionControllerInterface::init(node);
-    res = true;
 
     auto servo_param_listener = std::make_shared<servo::ParamListener>(node, "moveit_servo");
 
