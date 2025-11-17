@@ -17,8 +17,6 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-pgserver-media
   namespace: {{ .Release.Namespace }}
-  annotations:
-    "helm.sh/hook": pre-install
 spec:
   accessModes:
     - ReadWriteOnce
