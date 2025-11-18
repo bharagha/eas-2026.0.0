@@ -128,10 +128,10 @@ services:
     environment:
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
-      no_proxy: ${no_proxy},.scenescape.intel.com,influxdb2
+      no_proxy: ${no_proxy},${HOST_IP},.scenescape.intel.com,influxdb2
       HTTP_PROXY: ${http_proxy}
       HTTPS_PROXY: ${https_proxy}
-      NO_PROXY: ${no_proxy},.scenescape.intel.com,influxdb2
+      NO_PROXY: ${no_proxy},${HOST_IP},.scenescape.intel.com,influxdb2
       GF_SERVER_ROOT_URL: http://localhost/grafana/
       GF_SERVER_SERVE_FROM_SUB_PATH: true
       GF_PANELS_DISABLE_SANITIZE_HTML: true
