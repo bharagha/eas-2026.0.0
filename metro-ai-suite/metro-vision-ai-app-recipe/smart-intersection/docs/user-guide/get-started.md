@@ -112,12 +112,10 @@ Open a browser and go to the following endpoints to access the application. Use 
     - **Password**: `admin` (You will be prompted to change it on first login.)
 
 ### **InfluxDB UI** ###
-- **URL**: [https://localhost/influxdb/](https://localhost/influxdb/) *(Recommended for API access only since InfluxDB has limited support for sub-path proxying)*
-- **Alternative URL**: Direct access at `http://localhost:8086` *(Recommended for full UI functionality)*
+- **URL**: [http://localhost:8086](http://localhost:8086)
 - **Log in with credentials**:
     - **Username**: `<your_influx_username>` (Check `./smart-intersection/src/secrets/influxdb2/influxdb2-admin-username`)
     - **Password**: `<your_influx_password>` (Check `./smart-intersection/src/secrets/influxdb2/influxdb2-admin-password`).
-
 
 ### **NodeRED UI** ###
 - **URL**: [https://localhost/nodered/](https://localhost/nodered/)
