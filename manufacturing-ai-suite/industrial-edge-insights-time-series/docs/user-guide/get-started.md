@@ -181,7 +181,7 @@ To trigger the UDF inference on `GPU` in Time Series Analytics Microservice, run
 
 <!--hide_directive
 ::::{tab-set}
-:::{tab-item} **Wind Turbine Anomaly Detection**
+:::{tab-item} hide_directive-->**Wind Turbine Anomaly Detection**<!--hide_directive
 :sync: tab1
 hide_directive-->
 
