@@ -17,15 +17,16 @@
 
 # This script builds the Docker exec image for the RVC
 
-# Usage: ./docker_build_img.sh [ROS_DISTRO] [UBUNTU_VERSION] [--no-cache]
-# Example: ./docker_build_img.sh humble 22.04
-# Example: ./docker_build_img.sh jazzy 24.04 --no-cache
+# Usage: ./docker_build_img.sh [ROS_DISTRO] [--no-cache]
+# Example: ./docker_build_img.sh
+# Example: ./docker_build_img.sh humble
+# Example: ./docker_build_img.sh humble --no-cache
 
 set -e
 
 # Parse arguments
 ROS_DISTRO=${1:-humble}
-UBUNTU_VERSION=${2:-22.04}
+UBUNTU_VERSION=22.04
 NO_CACHE=""
 
 # Check for --no-cache flag in any position
