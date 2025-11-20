@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       fast-mapping-changed: ${{ steps.filter.outputs.fast-mapping-location || inputs.rebuild-all }}
+      groundfloor-changed: ${{ steps.filter.outputs.groundfloor-location || inputs.rebuild-all }}
       its-planner-changed: ${{ steps.filter.outputs.its-planner-location || inputs.rebuild-all }}
       multicam-demo-changed: ${{ steps.filter.outputs.multicam-demo-location || inputs.rebuild-all }}
     steps:
@@ -36,6 +37,8 @@ jobs:
           filters: |
             fast-mapping-location:
               - 'robotics-ai-suite/components/fast-mapping/**'
+            groundfloor-location:
+              - 'robotics-ai-suite/components/groundfloor/**'
             its-planner-location:
               - 'robotics-ai-suite/components/its-planner/**'
             multicam-demo-location:
@@ -46,6 +49,12 @@ jobs:
     needs: check-changes
     if: ${{ needs.check-changes.outputs.fast-mapping-changed == 'true' }}
     uses: "./.github/workflows/robotics-components-fast-mapping.yaml"
+
+  groundfloor:
+    name: "Groundfloor"
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.groundfloor-changed == 'true' }}
+    uses: "./.github/workflows/robotics-components-groundfloor.yaml"
 
   its-planner:
     name: "ITS Planner"

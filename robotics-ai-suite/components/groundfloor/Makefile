@@ -10,6 +10,12 @@ COMMIT := $(shell git rev-parse --short HEAD)
 DATE := $(shell git log -1 --format=%cd --date=format:"%Y%m%d")
 VERSION := $(COMMIT)-$(DATE)
 
+# Absolute path to the git repository root (needed so super-linter sees .git even when invoked from this component)
+REPO_ROOT:=$(shell git rev-parse --show-toplevel 2>/dev/null || echo $(ROOT_DIR))
+
+# Path of this component relative to repo root (used to scope linting with FILTER_REGEX_INCLUDE)
+COMPONENT_PATH_REL:=$(shell realpath --relative-to "$(REPO_ROOT)" "$(ROOT_DIR)" 2>/dev/null || echo robotics-ai-suite/components/groundfloor)
+
 ROS_DISTRO ?= humble
 ifeq ($(ROS_DISTRO),humble)
 	UBUNTU_CODENAME := jammy
@@ -118,6 +124,8 @@ lint-all:
 		-e SHELL=/bin/bash \
 		-e RUN_LOCAL=true \
 		--env-file ".github/linters/super-linter.env" \
+		-e FILTER_REGEX_INCLUDE="^$(COMPONENT_PATH_REL)/" \
+		-e LINTER_RULES_PATH=$(COMPONENT_PATH_REL)/.github/linters \
 		$(if $(VALIDATE_GITHUB_ACTIONS),-e VALIDATE_GITHUB_ACTIONS=$(VALIDATE_GITHUB_ACTIONS)) \
 		$(if $(VALIDATE_YAML),-e VALIDATE_YAML=$(VALIDATE_YAML)) \
 		$(if $(VALIDATE_JSON),-e VALIDATE_JSON=$(VALIDATE_JSON)) \
@@ -126,7 +134,7 @@ lint-all:
 		$(if $(VALIDATE_BASH),-e VALIDATE_BASH=$(VALIDATE_BASH)) \
 		$(if $(VALIDATE_MARKDOWN),-e VALIDATE_MARKDOWN=$(VALIDATE_MARKDOWN)) \
 		$(if $(VALIDATE_CLANG_FORMAT),-e VALIDATE_CLANG_FORMAT=$(VALIDATE_CLANG_FORMAT)) \
-		-v $(ROOT_DIR):/tmp/lint \
+		-v $(REPO_ROOT):/tmp/lint \
 			ghcr.io/super-linter/super-linter:slim-v8.1.0
 
 lint-clang:
