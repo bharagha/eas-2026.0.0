@@ -240,7 +240,7 @@ services:
       - NO_PROXY=${no_proxy},.scenescape.intel.com,influxdb2
       - HTTP_PROXY=${http_proxy}
       - HTTPS_PROXY=${https_proxy}
-      - SUPASS
+      - SUPASS=${SUPASS}
       - EXAMPLEDB=/home/scenescape/SceneScape/smart-intersection-ri.tar.bz2
       - DJANGO_DEBUG=True
     command: >
@@ -373,8 +373,6 @@ secrets:
     file: ./${SAMPLE_APP}/src/secrets/browser.auth
   controller.auth:
     file: ./${SAMPLE_APP}/src/secrets/controller.auth
-  supass:
-    file: ./${SAMPLE_APP}/src/secrets/supass
 
 configs:
   mosquitto-secure:
