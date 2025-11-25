@@ -122,7 +122,11 @@ services:
     - ./apps/${SAMPLE_APP}/time-series-analytics-config/tick_scripts/:/tmp/${SAMPLE_APP}/tick_scripts/:ro
     - ./apps/${SAMPLE_APP}/time-series-analytics-config/config.json:/app/config.json:ro
     - ./apps/${SAMPLE_APP}/time-series-analytics-config/models/:/tmp/${SAMPLE_APP}/models/:ro
+<<<<<<< HEAD
     - ${DRI_MOUNT_PATH:-/dev/null}:/dev/dri:ro
+=======
+    - /dev/dri:/dev/dri:ro
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
     - "/run/udev:/run/udev:ro"
     group_add:
     # render group ID for ubuntu 20.04 host OS

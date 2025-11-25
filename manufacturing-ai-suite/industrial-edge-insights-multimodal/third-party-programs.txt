@@ -50,6 +50,7 @@ ia-time-series-analytics-microservice:
 
 Info available at [third-party-programs.txt](https://github.com/open-edge-platform/edge-ai-libraries/blob/main/microservices/time-series-analytics/third-party-programs.txt)
 
+<<<<<<< HEAD
 ----------------------------------------------------------------------
 
 configs/time-series-analytics-microservice/udfs/requirements.txt
@@ -93,6 +94,8 @@ six==1.17.0
 License-Identifier: PSF (Python Software Foundation)
 matplotlib==3.10.7
 
+=======
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 ---------------------------------------------------------------------------------------------------------------------------
 
 ia-mqtt-publisher microservice:

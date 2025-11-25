@@ -20,7 +20,10 @@ from components.ffmpeg import audio_preprocessing
 from utils.audio_util import save_audio_file
 from utils.locks import audio_pipeline_lock, video_analytics_lock
 from components.va.va_pipeline_service import VideoAnalyticsPipelineService, PipelineOptions
+<<<<<<< HEAD
 from utils.session_manager import generate_session_id
+=======
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 import logging
 logger = logging.getLogger(__name__)
 
@@ -283,7 +286,10 @@ def start_video_analytics_pipeline(
             options = PipelineOptions(
                 output_dir=output_dir,
                 output_rtsp=config.va_pipeline.output_rtsp_url,
+<<<<<<< HEAD
                 threshold=config.models.va.threshold,
+=======
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
             )
 
             # Launch each pipeline

@@ -2,9 +2,14 @@
 
 ## Current Release
 
+<<<<<<< HEAD
 **Version**: 2025.2.0 \
 **Helm Chart Version**: 1.0.0 \
 **Release Date**: 10 Dec 2025  
+=======
+**Version**: 1.0.0 \
+**Release Date**: 21 Nov 2025  
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 
 **Features**:
 

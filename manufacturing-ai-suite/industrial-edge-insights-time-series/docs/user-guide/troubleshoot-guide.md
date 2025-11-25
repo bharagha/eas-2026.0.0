@@ -17,19 +17,31 @@ is wrong, data timestamps fall outside Grafana's query window.
 Check the date/time using the command below:
 
 ``` sh
+<<<<<<< HEAD
 date
+=======
+$ date
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 ```
 
 Set the correct date/time manually:
 
 ``` sh
+<<<<<<< HEAD
 sudo date -s 'YYYY-MM-DD HH:MM:SS'
+=======
+$ sudo date -s 'YYYY-MM-DD HH:MM:SS'
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 ```
 
 Set date/time from the internet:
 
 ``` sh
+<<<<<<< HEAD
 sudo date -s "$(wget --method=HEAD -qSO- --max-redirect=0 google.com 2>&1 | sed -n 's/^ *Date: *//p')"
+=======
+$ sudo date -s "$(wget --method=HEAD -qSO- --max-redirect=0 google.com 2>&1 | sed -n 's/^ *Date: *//p')"
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 ```
 
 ---
@@ -38,6 +50,7 @@ sudo date -s "$(wget --method=HEAD -qSO- --max-redirect=0 google.com 2>&1 | sed 
 
 ### Issue
 
+<<<<<<< HEAD
 - Data appears to be deleted beyond the configured retention policy (RP).
 - InfluxDB 1.x deletes old data based on the retention policy duration
   and shard group duration.
@@ -49,6 +62,20 @@ sudo date -s "$(wget --method=HEAD -qSO- --max-redirect=0 google.com 2>&1 | sed 
   the RP.
 - For RPs **≤ 2 days**, shard group duration = **1 hour**.
 - InfluxDB always expires data at **RP + shard duration**.
+=======
+-   Data appears to be deleted beyond the configured retention policy
+    (RP).
+-   InfluxDB 1.x deletes old data based on the retention policy duration
+    and shard group duration.
+
+### Reason
+
+-   Data is grouped into **shards**.
+-   Shards are deleted only when **all data inside them** is older than
+    the RP.
+-   For RPs **≤ 2 days**, shard group duration = **1 hour**.
+-   InfluxDB always expires data at **RP + shard duration**.
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 
 Example:
 
@@ -60,6 +87,7 @@ deletes the shard only when everything inside it is past the RP → at
 So the effective expiration time is **1 hour RP + 1 hour shard duration
 = 2 hours**.
 
+<<<<<<< HEAD
 | Retention Policy | Shard Duration |Actual Expiry |
 |---|---|---|
 | 1 hour | 1 hour | 2 hours |
@@ -72,6 +100,20 @@ So the effective expiration time is **1 hour RP + 1 hour shard duration
     1.x.
 - A 1-hour RP will **always** result in \~2 hours before deletion.
 - No configuration can force deletion exactly at the RP limit.
+=======
+  Retention Policy   Shard Duration   Actual Expiry
+  ------------------ ---------------- -----------------
+  1 hour             1 hour           2 hours
+  2 days             1 hour           2 days + 1 hr
+  30 days            24 hours         30 days + 24 hr
+
+### Solution
+
+-   Understand that this is **normal and expected behavior** in InfluxDB
+    1.x.
+-   A 1-hour RP will **always** result in \~2 hours before deletion.
+-   No configuration can force deletion exactly at the RP limit.
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 
 ---
 
@@ -114,3 +156,8 @@ fully ready.
 
 No action required --- wait for the deployment to complete and for all
 pods to become ready.
+<<<<<<< HEAD
+=======
+
+---
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)

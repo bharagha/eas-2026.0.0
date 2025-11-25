@@ -126,7 +126,11 @@ cd edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-multimodal
 
 3. Check the output in Grafana.
 
+<<<<<<< HEAD
     - Use link `https://<host_ip>:3000` to launch Grafana from browser (preferably, chrome browser)
+=======
+    - Use link `http://<host_ip>:3000` to launch Grafana from browser (preferably, chrome browser)
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
 
     - Login to the Grafana with values set for `VISUALIZER_GRAFANA_USER` and `VISUALIZER_GRAFANA_PASSWORD`
       in `.env` file and select **Multimodal Weld Defect Detection Dashboard**.

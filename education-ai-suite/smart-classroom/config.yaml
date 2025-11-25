@@ -34,6 +34,10 @@ models:
 
   va:
     models_base_path: "models"
+<<<<<<< HEAD
+=======
+    device: NPU # NPU or GPU
+>>>>>>> 87cbb96c (Merge branch 'main' into smartintersection_security)
     threshold: 0.5 # confidence threshold for YOLO detections
 
 mindmap:
