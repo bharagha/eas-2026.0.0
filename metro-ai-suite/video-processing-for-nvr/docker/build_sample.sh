@@ -1,11 +1,7 @@
 set -e
 
-IMAGE_TAG=${1-vppsample:latest}
+IMAGE_TAG=${1-vppsample:v2025.2.0-rc2}
 DOCKERFILE=${2-Dockerfile.sample}
-
-cd ..
-sudo apt download intel-vppsdk
-cd docker
 
 docker build \
     --network=host \
