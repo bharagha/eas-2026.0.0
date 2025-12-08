@@ -426,11 +426,11 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, please follow b
    ```
 
   <!--hide_directive
-   :::{tab-set}
-   :::{tab-item} hide_directive--> **Weld Anomaly Detection**
-    <!--hide_directive
-   :sync: tab2
-   hide_directive-->
+  :::{tab-set}
+  :::{tab-item} hide_directive--> **Weld Anomaly Detection**
+  <!--hide_directive
+  :sync: tab2
+  hide_directive-->
 
    ```sh
    cd edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection # path relative to git clone   folder
