@@ -32,14 +32,16 @@ import {
   setProcessingMode,
   setAudioStatus,
   setVideoStatus,
-  startTranscription
+  startTranscription,
+  setHasUploadedVideoFiles
 } from '../../redux/slices/uiSlice';
 import { resetTranscript, appendTranscript, finishTranscript, startTranscript } from '../../redux/slices/transcriptSlice';
 import { resetSummary } from '../../redux/slices/summarySlice';
 import { clearMindmap } from '../../redux/slices/mindmapSlice';
 import { setClassStatistics } from '../../redux/slices/fetchClassStatistics';
 import { constants } from '../../constants';
- 
+import { useTranslation } from 'react-i18next';
+
 interface UploadFilesModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,7 +57,7 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(constants.START_NOTIFICATION);
   const [monitoringTimer, setMonitoringTimer] = useState<number | null>(null);
- 
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const abortRef = useRef<AbortController | null>(null);
   const shouldAbortRef = useRef<boolean>(true);
@@ -73,9 +75,25 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
       const target = e.target as HTMLInputElement;
       if (target.files && target.files[0]) {
         const file = target.files[0];
-        setter(file);
-        console.log('Selected file:', file);
-        setError(null);
+        const fileName = file.name.toLowerCase();
+        let isValidFile = false;
+        if (accept === '.wav,.mp3') {
+          isValidFile = fileName.endsWith('.wav') || fileName.endsWith('.mp3');
+        } else if (accept === '.mp4') {
+          isValidFile = fileName.endsWith('.mp4');
+        } else {
+          isValidFile = true;
+        }
+        
+        if (isValidFile) {
+          setter(file);
+          console.log('Selected file:', file);
+          setError(null);
+        } else {
+          setter(null);
+          const expectedTypes = accept.replace(/\./g, '').replace(/,/g, ', ');
+          setError(`Please select only ${expectedTypes} files.`);
+        }
       } else {
         setter(null);
         console.log('No file selected');
@@ -247,59 +265,81 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
   const handleApply = async () => {
     const hasAudioFile = audioFile !== null;
     const hasVideoFiles = frontCameraPath !== null || rearCameraPath !== null || boardCameraPath !== null;
-   
+  
     if (!hasAudioFile && !hasVideoFiles) {
       setError('At least one file (audio or video) is required.');
       return;
     }
- 
+
     setNotification('Starting processing...');
     dispatch(resetFlow());
     dispatch(resetTranscript());
     dispatch(resetSummary());
     dispatch(clearMindmap());
     dispatch(startProcessing());
- 
+
+    if (hasAudioFile) {
+      dispatch(setAudioStatus('processing'));
+      console.log('🎯 Audio status set to processing - will show "Analyzing audio..."');
+    } else {
+      dispatch(setAudioStatus('no-devices'));
+      console.log('🎯 Audio status set to ready - no audio file selected');
+    }
+
     setLoading(true);
     setError(null);
- 
+
     try {
       setNotification('Creating session...');
       const sessionResponse = await createSession();
       const sessionId = sessionResponse.sessionId;
       console.log('✅ Session created:', sessionId);
       dispatch(setSessionId(sessionId));
+      
       try {
         console.log('📊 Starting monitoring for session:', sessionId);
         const monitoringResult = await startMonitoring(sessionId);
+        const timer = setTimeout(async () => {
+          try {
+            console.log('⏰ 45 minutes elapsed - stopping monitoring');
+            const stopResult = await stopMonitoring();
+            console.log('✅ Monitoring stopped after 45 minutes:', stopResult.message);
+          } catch (error) {
+            console.error('❌ Failed to stop monitoring after 45 minutes:', error);
+          }
+        }, 45 * 60 * 1000);
 
+        setMonitoringTimer(timer);
+        console.log('⏰ Monitoring timer set for 45 minutes');
       } catch (monitoringError) {
         console.error('❌ Failed to start monitoring (non-critical):', monitoringError);
       }
- 
+
       let audioPath = '';
       if (hasAudioFile) {
-        setNotification('Uploading audio...');
+        setNotification('Uploading...');
         const audioResponse = await uploadAudio(audioFile);
         dispatch(setUploadedAudioPath(audioResponse.path));
-        dispatch(setAudioStatus('processing'));
+        // Audio status already set to 'processing' above
         audioPath = audioResponse.path;
         console.log('✅ Audio uploaded successfully:', audioResponse);
-        console.log('🎯 Audio status set to processing - will show "Analyzing audio..."');
         dispatch(setProcessingMode('audio'));
       } else {
         console.log('📝 No audio file provided, skipping audio upload');
         dispatch(setProcessingMode('video-only'));
+        // Audio status already set to 'ready' above
       }
+
       const frontFullPath = frontCameraPath ? constructFilePath(frontCameraPath.name) : "";
       const rearFullPath = rearCameraPath ? constructFilePath(rearCameraPath.name) : "";
       const boardFullPath = boardCameraPath ? constructFilePath(boardCameraPath.name) : "";
- 
+
       console.log('📹 Video file paths:', {
         front: frontFullPath,
         rear: rearFullPath,
         board: boardFullPath,
       });
+
       const allPipelines = [
         {
           pipeline_name: 'front',
@@ -314,34 +354,45 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
           source: boardFullPath
         },
       ];
- 
+
       const validPipelines = allPipelines.filter(pipeline =>
         pipeline.source && pipeline.source.trim() !== ''
       );
- 
+
       console.log('📹 All pipelines:', allPipelines);
       console.log('📹 Valid pipelines to send:', validPipelines);
- 
+
       const hasValidVideo = validPipelines.length > 0;
+      console.log('🎯 Has valid video:', hasValidVideo);
+      
+      // Set the uploaded video files flag
+      dispatch(setHasUploadedVideoFiles(hasValidVideo));
+      
       setNotification(getProcessingNotification(hasAudioFile, hasValidVideo));
-     
+    
+      if (hasValidVideo) {
+        dispatch(setVideoStatus('starting'));
+        console.log('📹 Setting video status to starting - valid files found');
+      } else {
+        dispatch(setVideoStatus('no-config'));
+        console.log('📹 Setting video status to no-config - no valid files');
+      }
+
       let videoAnalyticsStarted = false;
       if (hasValidVideo) {
         videoAnalyticsStarted = await startVideoAnalyticsWithSession(sessionId, validPipelines);
         if (videoAnalyticsStarted) {
           console.log('✅ Video analytics started successfully');
+          // Status will be updated by startVideoAnalyticsWithSession to 'streaming'
         } else {
           console.warn('⚠️ Video analytics failed to start');
+          dispatch(setVideoStatus('failed'));
         }
       } else {
         console.log('📹 No valid video files provided, skipping video analytics');
-        if (hasVideoFiles) {
-          dispatch(setVideoStatus('failed'));
-        } else {
-          dispatch(setVideoStatus('no-config'));
-        }
+        // Status already set to 'no-config' above
       }
-     
+    
       if (hasAudioFile && audioPath) {
         console.log('🎯 Starting transcript stream - audio status will change from processing to transcribing');
         startStreamTranscriptAndVideoAnalytics(audioPath, sessionId, validPipelines);
@@ -349,39 +400,29 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
       } else {
         console.log('📝 No audio file provided, skipping transcription');
       }
-
+      
       const finalNotification = getSuccessNotification(hasAudioFile, hasValidVideo, videoAnalyticsStarted);
+  
+      console.log(finalNotification)
       setNotification(finalNotification);
-     
+    
       console.log('✅ Processing summary:', {
         audioFile: hasAudioFile,
         videoFiles: hasValidVideo,
         videoAnalyticsStarted,
         finalMessage: finalNotification
       });
-     
+    
       shouldAbortRef.current = false;
       setLoading(false);
       onClose();
- 
+
     } catch (err) {
       console.error('❌ Failed during processing:', err);
       setError('Failed during processing. Please try again.');
       setNotification('');
       dispatch(processingFailed());
       setLoading(false);
-
-      if (monitoringTimer) {
-        clearTimeout(monitoringTimer);
-        setMonitoringTimer(null);
-
-        try {
-          await stopMonitoring();
-          console.log('🧹 Monitoring stopped due to error cleanup');
-        } catch (stopError) {
-          console.error('❌ Failed to stop monitoring during error cleanup:', stopError);
-        }
-      }
     }
   };
 
@@ -389,9 +430,6 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
     return () => {
       if (monitoringTimer) {
         clearTimeout(monitoringTimer);
-        stopMonitoring().catch(error => {
-          console.error('❌ Failed to stop monitoring during cleanup:', error);
-        });
       }
       
       if (abortRef.current && shouldAbortRef.current) {
@@ -406,11 +444,11 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="upload-files-modal">
-        <h2>Upload Files</h2>
+        <h2>{t('uploadFiles.title')}</h2>
         <hr className="modal-title-line" />
         <div className="modal-body">
           <div className="modal-input-group">
-            <label>Base Directory for Video Files</label>
+            <label>{t('uploadFiles.baseDirectoryLabel')}</label>
             <input
               type="text"
               value={baseDirectory}
@@ -419,7 +457,7 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
             />
           </div>
           <div className="modal-input-group">
-            <label>Audio File</label>
+            <label>{t('uploadFiles.audioFileLabel')}</label>
             <div className="file-input-wrapper">
               <input
                 type="text"
@@ -431,12 +469,12 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
                 src={folderIcon}
                 alt="Choose File"
                 className="folder-icon"
-                onClick={() => handleFileSelect(setAudioFile, 'audio/*')}
+                onClick={() => handleFileSelect(setAudioFile, '.wav,.mp3')}
               />
             </div>
           </div>
           <div className="modal-input-group">
-            <label>Front Camera File</label>
+            <label>{t('uploadFiles.frontCameraFile')}</label>
             <div className="file-input-wrapper">
               <input
                 type="text"
@@ -448,29 +486,31 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
                 src={folderIcon}
                 alt="Choose File"
                 className="folder-icon"
-                onClick={() => handleFileSelect(setFrontCameraPath, 'video/*')}
+                onClick={() => handleFileSelect(setFrontCameraPath, '.mp4')}
               />
             </div>
           </div>
+
           <div className="modal-input-group">
-            <label>Rear Camera File</label>
+            <label>{t('uploadFiles.backCameraFile')}</label>
             <div className="file-input-wrapper">
               <input
                 type="text"
                 value={rearCameraPath?.name || ''}
                 readOnly
-                placeholder="Select a rear camera file"
+                placeholder="Select a back camera file"
               />
               <img
                 src={folderIcon}
                 alt="Choose File"
                 className="folder-icon"
-                onClick={() => handleFileSelect(setRearCameraPath, 'video/*')}
+                onClick={() => handleFileSelect(setRearCameraPath, '.mp4')}
               />
             </div>
           </div>
+
           <div className="modal-input-group">
-            <label>Board Camera File</label>
+            <label>{t('uploadFiles.boardCameraFile')}</label>
             <div className="file-input-wrapper">
               <input
                 type="text"
@@ -482,7 +522,7 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
                 src={folderIcon}
                 alt="Choose File"
                 className="folder-icon"
-                onClick={() => handleFileSelect(setBoardCameraPath, 'video/*')}
+                onClick={() => handleFileSelect(setBoardCameraPath, '.mp4')}
               />
             </div>
           </div>
@@ -495,7 +535,7 @@ const UploadFilesModal: React.FC<UploadFilesModalProps> = ({ isOpen, onClose }) 
             className="apply-button"
             disabled={(!audioFile && !frontCameraPath && !rearCameraPath && !boardCameraPath) || loading}
           >
-            {loading ? 'Processing...' : 'Apply & Start Processing'}
+            {loading ? t('uploadFiles.processing') : t('uploadFiles.applyAndStart')}
           </button>
         </div>
       </div>

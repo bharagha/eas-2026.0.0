@@ -24,13 +24,18 @@ const VideoStream: React.FC<VideoStreamProps> = ({ isFullScreen, onToggleFullScr
   const isRecording = useAppSelector((state) => state.ui.aiProcessing);
   const uploadedAudioPath = useAppSelector((state) => state.ui.uploadedAudioPath);
   const transcriptStatus = useAppSelector((state) => state.transcript.status);
-  
+  const videoStatus = useAppSelector((state) => state.ui.videoStatus);
   const streams = useAppSelector((state) => ({
     front: state.ui.frontCameraStream,
     back: state.ui.backCameraStream,
     content: state.ui.boardCameraStream,
   }));
- 
+  const streamTypes = [
+  { pipeline: "front", label: t("accordion.frontCamera") },
+  { pipeline: "back", label: t("accordion.backCamera") },
+  { pipeline: "content", label: t("accordion.boardCamera") },
+  { pipeline: "all", label: t("accordion.allCameras") }
+  ];
   const isValidStream = (stream: string | null): boolean => {
     const isValid = stream && stream.trim() !== '' && (
       stream.startsWith("http://") ||
@@ -65,24 +70,24 @@ const VideoStream: React.FC<VideoStreamProps> = ({ isFullScreen, onToggleFullScr
     if (videoAnalyticsLoading) {
       return "loading";
     }
+    
     if (videoAnalyticsActive && hasValidStreams()) {
       return "active";
     }
+    
     const currentlyRecording = isCurrentlyRecording();
-    
-    if (currentlyRecording && !videoAnalyticsActive && !videoAnalyticsLoading) {
-      return "audio_only"; 
+    if (videoStatus === 'starting' || videoStatus === 'streaming') {
+      return "loading";
     }
-    if (!currentlyRecording && !videoAnalyticsActive && !videoAnalyticsLoading) {
-      return "inactive";
+    if (videoStatus === 'failed' && currentlyRecording) {
+      return "video_failed";
     }
-    if (currentlyRecording && !videoAnalyticsActive && !videoAnalyticsLoading) {
-      const hasEmptyStreams = streams.front === '' && streams.back === '' && streams.content === '';
-      if (hasEmptyStreams) {
-        return "video_failed";
-      }
+    if (currentlyRecording && hasValidStreams() && !videoAnalyticsActive && !videoAnalyticsLoading) {
+      return "video_failed";
+    } 
+    if (currentlyRecording && !hasValidStreams() && !videoAnalyticsActive && !videoAnalyticsLoading) {
+      return "audio_only";
     }
-    
     return "inactive";
   };
 
@@ -154,27 +159,26 @@ const VideoStream: React.FC<VideoStreamProps> = ({ isFullScreen, onToggleFullScr
         </div>
         {isRoomView && (
           <div className="stream-controls">
-            {["front", "back", "content", "all"].map((pipeline) => {
-              const isAvailable = pipeline === "all"
-                ? hasValidStreams()
-                : isValidStream(streams[pipeline as keyof typeof streams]);
-             
-              return (
-                <span
-                  key={pipeline}
-                  className={`stream-control-label ${activeStream === pipeline ? "active" : ""} ${!isAvailable || videoAnalyticsLoading ? "disabled" : ""}`}
-                  onClick={() => !videoAnalyticsLoading && isAvailable && handleStreamClick(pipeline as "front" | "back" | "content" | "all")}
-                  style={{
-                    opacity: isAvailable && !videoAnalyticsLoading ? 1 : 0.5,
-                    cursor: isAvailable && !videoAnalyticsLoading ? 'pointer' : 'not-allowed'
-                  }}
-                >
-                  {pipeline.charAt(0).toUpperCase() + pipeline.slice(1)}
-                  {videoAnalyticsLoading && <span className="control-spinner" />}
-                </span>
-              );
-            })}
-          </div>
+          {streamTypes.map(({ pipeline, label }) => {
+            const isAvailable = pipeline === "all"
+              ? hasValidStreams()
+              : isValidStream(streams[pipeline as keyof typeof streams]);
+        
+            return (
+              <span
+                key={pipeline}
+                className={`stream-control-label ${activeStream === pipeline ? "active" : ""} ${!isAvailable || videoAnalyticsLoading ? "disabled" : ""}`}
+                onClick={() => !videoAnalyticsLoading && isAvailable && handleStreamClick(pipeline as "front" | "back" | "content" | "all")}
+                style={{
+                  opacity: isAvailable && !videoAnalyticsLoading ? 1 : 0.5,
+                  cursor: isAvailable && !videoAnalyticsLoading ? "pointer" : "not-allowed"
+                }}
+        >
+                {label}
+        </span>
+            );
+          })}
+        </div>
         )}
       </div>
        
@@ -197,8 +201,6 @@ const VideoStream: React.FC<VideoStreamProps> = ({ isFullScreen, onToggleFullScr
                 alt="Audio Recording Icon"
                 className="streaming-icon"
               />
-              <h3>Audio Recording Active</h3>
-              <p>Recording audio without video analytics.</p>
               <p>Video analytics service may not be available or cameras not configured.</p>
               <small>Configure cameras in settings to enable video analytics.</small>
             </div>
