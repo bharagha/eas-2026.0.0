@@ -64,7 +64,8 @@ planner_server:
       h: 32
       n: 2
 ```
-
+<!--hide_directive:::hide_directive-->
+<!--hide_directive::::hide_directive-->
 
 ## ITS Path Planner Plugin Parameters
 
@@ -149,8 +150,8 @@ in the configuration file below for the `default ITS planner`:
 /opt/ros/humble/share/its_planner/nav2_params_humble.yaml
 ```
 
-<!--hide_directive:::
-::::hide_directive-->
+<!--hide_directive:::hide_directive-->
+<!--hide_directive::::hide_directive-->
 
 ### Ackermann ITS Planner
 You can modify plugin parameters by editing the `planner_server` section 
@@ -172,5 +173,5 @@ in the configuration file below for the `Ackermann ITS planner`:
 /opt/ros/humble/share/its_planner/nav2_params_dubins_humble.yaml
 ```
 
-<!--hide_directive:::
-::::hide_directive-->
+<!--hide_directive:::hide_directive-->
+<!--hide_directive::::hide_directive-->
